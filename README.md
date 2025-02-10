@@ -1,8 +1,4 @@
-Here is the **finalized README** for **DogecoinEV Ordinals Indexer**, with **inscription height set to 0** and **RPC port set to 42069**:
 
----
-
-```markdown
 # DogecoinEV Ordinals Indexer MAY STILL HAVE BUGS
 
 ℹ️ This is a fork adapted for the DogecoinEV blockchain from [apezord/ord-dogecoin](https://github.com/apezord/ord-dogecoin).
