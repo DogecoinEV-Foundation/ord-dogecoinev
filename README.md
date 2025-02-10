@@ -1,97 +1,148 @@
-# Shibes
+Here is the **finalized README** for **DogecoinEV Ordinals Indexer**, with **inscription height set to 0** and **RPC port set to 42069**:
 
-ℹ️ This is a fork/based on [apezord/ord-dogecoin](https://github.com/apezord/ord-dogecoin)
+---
 
-## Key differences
+```markdown
+# DogecoinEV Ordinals Indexer MAY STILL HAVE BUGS
 
-‼️ DISCLAIMER: OUR CODE MAY STILL HAVE BUGS️
+ℹ️ This is a fork adapted for the DogecoinEV blockchain from [apezord/ord-dogecoin](https://github.com/apezord/ord-dogecoin).
 
-We included the real wonky block rewards from block 0 until block 144,999. We invite you to critically review our code in `src/epoch.rs`. We are convinced that doginals should use actual block rewards instead of a simplified version.
+## **Prerequisites**
+To run the **DogecoinEV Ordinals Indexer**, you must set up and fully sync a **DogecoinEV** node.
 
-## API documentation
-You can find the API documentation [here](openapi.yaml).
-Most convenient way to view the API documentation is to use the [Swagger Editor](https://editor.swagger.io/).
-You can import the `openapi.yaml` file and view the API documentation via Import URL: `https://raw.githubusercontent.com/verydogelabs/wonky-ord-dogecoin/main/openapi.yaml`.
+### 1. Install DogecoinEV Core  
+Download and install the latest version from [DogecoinEV Core](https://github.com/DogecoinEV-Foundation/DogecoinEV).
 
-## TL;DR How to run
-
-### Preqrequisites
-You will have to launch your own Dogecoin node and have it fully synced. You can use the following guide to set up your own Dogecoin node:
-1. Download latest version from [Dogecoin](https://github.com/dogecoin/dogecoin/releases) and install it.
-   1. We have tested and launched the indexer with Dogecoin Core v1.14.8.
-2. Follow the [installation instructions](https://github.com/dogecoin/dogecoin/blob/master/INSTALL.md)
-   1. We started the Dogecoin Core with the following flags:
-      ```shell
-      dogecoind -txindex -rpcuser=foo -rpcpassword=bar -rpcport=22555 -rpcallowip=0.0.0.0/0 -rpcbind=127.0.0.1
-      ```
-   2. Make sure your Dogecoin node is fully synced before starting the indexer.
-   3. ‼️ **IMPORTANT** Ensure to replace `foo` and `bar` with your own username and password. **IMPORTANT** ‼️
-3. Start the indexer with rpc-url pointing to your Dogecoin node and the data-dir pointing to the directory where the indexer should store its data.
+### 2. Start Your DogecoinEV Node  
+Run the following command to start **DogecoinEV Core** with the required flags:
 
 ```shell
+dogecoinevd -txindex -rpcuser=your_username -rpcpassword=your_password -rpcport=42069 -rpcallowip=0.0.0.0/0 -rpcbind=127.0.0.1
+```
 
-### Start the ord indexer / server
+- Ensure your **DogecoinEV node is fully synced** before starting the indexer.
+- ‼️ **IMPORTANT**: Replace `your_username` and `your_password` with secure credentials.
+
+---
+
+## **Building the Indexer**
+
+### 1. Install Dependencies  
+Ensure that you have the necessary dependencies installed:
+
 ```shell
-export RUST_LOG=info
-// Set the path to the subsidies.json and starting_sats.json files
-export SUBSIDIES_PATH=/home/dogeuser/wonky-ord-dogecoin/subsidies.json
-export STARTING_SATS_PATH=/home/dogeuser/wonky-ord-dogecoin/starting_sats.json
+sudo apt update && sudo apt install -y build-essential clang pkg-config libssl-dev git
+```
 
-# ensure the data directory exists
+### 2. Install Rust  
+If you don't have **Rust** installed, install it using the following command:
+
+```shell
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source $HOME/.cargo/env
+```
+
+### 3. Clone the Repository  
+```shell
+git clone https://github.com/DogecoinEV-Foundation/ord-dogecoinev.git
+cd ord-dogecoinev
+```
+
+### 4. Build the Release Version  
+```shell
+cargo build --release
+```
+
+---
+
+## **Running the Indexer**
+
+### **1. Ensure the Data Directory Exists**
+```shell
 mkdir -p /mnt/ord-node/indexer-data-main
-
-# replace YOUR_RPC_URL with the URL of your Dogecoin node like: http://foo:bar@127.0.0.1:22555
-
-// Start Indexing
-ord --rpc-url=YOUR_RPC_URL --data-dir=/mnt/ord-node/indexer-data-main --nr-parallel-requests=16 --first-inscription-height=4609723 --first-dune-height=5084000 --index-dunes --index-transactions --index-drc20 index
-
-// Start Indexing + Server
-ord --rpc-url=YOUR_RPC_URL --data-dir=/mnt/ord-node/indexer-data-main --nr-parallel-requests=16 --first-inscription-height=4609723 --first-dune-height=5084000 --index-dunes --index-transactions --index-drc20 server
-```
-`--index-transactions` will store transaction data, this is currently needed for `--index-drc20` and furthermore helps
-for a better performance for the API.
-`--nr-parallel-requests` will configure how many parallel requests while indexing are sent to your RPC Server - 16 is
-recommended for default node settings.
-
-With all settings enabled, the database will currently need around 400gb when fully indexed.
-
-### Required env vars
-
-On the root level of this repo you'll find a `subsidies.json` and `starting_sats.json` file. When starting ord you will need to set the location of these files to env variables.
-
-Example:
-If your `wonky-ord-dogecoin` dir is `/home/dogeuser/wonky-ord-dogecoin` then set the vars:
-`SUBSIDIES_PATH=/home/dogeuser/wonky-ord-dogecoin/subsidies.json`
-and
-`STARTING_SATS_PATH=/home/dogeuser/wonky-ord-dogecoin/starting_sats.json`.
-
-## Start the ord indexer / server in Docker
-You can use a docker image to run the ord indexer / server.
-
-### Prerequisites Docker
-1. Use ubuntu linux or a similar distribution
-2. Install dogecoind and have it fully synced
-   1See [Dogecoin installation instructions](#preqrequisites)
-3. Install docker and docker-compose (Ubuntu)[https://docs.docker.com/engine/install/ubuntu/]
-4. Clone this repository
-
-### Build the Docker image
-```shell
-docker build -t verydogelabs/wonky-ord-dogecoin .
-```
-### Start the ord in a docker container
-```shell
-docker compose up -d
 ```
 
-### Stop the ord in a docker container
-When stopping the ord in a container it is important to add a timeout.
-If no timeout is add, the process cannot close the database properly and the next start will take ages or fail.
+### **2. Start Indexing**
+Replace `YOUR_RPC_URL` with your actual **DogecoinEV node URL** (e.g., `http://your_username:your_password@127.0.0.1:42069`).
 
 ```shell
-docker compose stop -t 600
-docker compose down
+./target/release/ord \
+    --first-inscription-height=0 \
+    --rpc-url=http://your_username:your_password@127.0.0.1:42069 \
+    --data-dir=/mnt/ord-node/indexer-data-main \
+    --index-transactions \
+    --index-dunes \
+    --index-drc20 \
+    --nr-parallel-requests=16 \
+    index
 ```
 
-## Original README
-Please check the original [README](READMEFROMAPEZORD.md) for more information on how to run `ord` and the required env vars.
+### **3. Start the Indexer with the Server**
+```shell
+./target/release/ord \
+    --first-inscription-height=0 \
+    --rpc-url=http://your_username:your_password@127.0.0.1:42069 \
+    --data-dir=/mnt/ord-node/indexer-data-main \
+    --index-transactions \
+    --index-dunes \
+    --index-drc20 \
+    --nr-parallel-requests=16 \
+    server --http-port 8080
+```
+
+---
+
+## **Important Parameters**
+- `--index-transactions`: Stores transaction data for better API performance.
+- `--index-drc20`: Enables indexing of **DRC-20 tokens, including Dev-20’s** *(subject to change)*.
+- `--index-dunes`: Enables indexing of **Dunes**.
+- `--nr-parallel-requests=16`: Configures parallel requests to your RPC Server.
+- `--data-dir`: Specifies where the indexer stores its data.
+- `--http-port`: The port where the server will listen (**default: 8080**).
+
+---
+
+## **Storage Requirements**
+The database size depends on the indexing options enabled and the current blockchain size. Ensure you have at least **400GB of free storage**.
+
+---
+
+## **API Documentation**
+You can find the API documentation in the [openapi.yaml](https://github.com/DogecoinEV-Foundation/ord-dogecoinev/blob/main/openapi.yaml) file.  
+The most convenient way to view the API documentation is to use the [Swagger Editor](https://editor.swagger.io/).
+
+---
+
+## **Troubleshooting**
+
+### **Indexer Not Syncing?**
+- Ensure that **DogecoinEV Core** is running and fully synced.
+- Confirm that `-txindex` is enabled in your **DogecoinEV** node.
+- Check that `rpcuser` and `rpcpassword` match in both `dogecoinevd` and the indexer command.
+
+### **Out of Disk Space?**
+- You need at least **400GB** of free space for the full index.
+
+### **Indexer Crashing?**
+- Run the command with `RUST_BACKTRACE=1` for more debugging information:
+  ```shell
+  RUST_BACKTRACE=1 ./target/release/ord --rpc-url=http://your_username:your_password@127.0.0.1:42069 --data-dir=/mnt/ord-node/indexer-data-main index
+  ```
+
+---
+
+## **Contributing**
+Contributions are welcome! Please feel free to submit a **Pull Request**.  
+For major changes, open an **Issue** first to discuss the modifications.
+
+---
+
+## **License**
+This project is licensed under [CC0-1.0 license](https://github.com/DogecoinEV-Foundation/ord-dogecoinev/blob/main/LICENSE).
+
+---
+
+## **Repository**
+For more information, source code, and updates, visit the [GitHub repository](https://github.com/DogecoinEV-Foundation/ord-dogecoinev).
+```
+
